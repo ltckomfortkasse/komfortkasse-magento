@@ -1,0 +1,264 @@
+<?xml version="1.0"?>
+<!--
+ Komfortkasse
+ Magento Plugin - system.xml
+ @version 1.4.4.11-Magento */ -->
+ <config>
+  <sections>
+    <payment>
+      <groups>
+        <komfortkasse translate="label">
+          <label>Komfortkasse</label>
+          <frontend_type>text</frontend_type>
+          <sort_order>900</sort_order>
+          <show_in_default>1</show_in_default>
+          <show_in_website>1</show_in_website>
+          <show_in_store>1</show_in_store>
+          <fields>
+            <activate_export translate="label">
+              <label>Export Orders</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_enabledisable
+              </source_model>
+              <sort_order>10</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Activate export of orders</comment>
+            </activate_export>
+            <activate_update translate="label">
+              <label>Update Orders</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_enabledisable
+              </source_model>
+              <sort_order>20</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Activate update of orders</comment>
+            </activate_update>
+            <payment_methods translate="label">
+              <label>Prepayment: Payment Methods</label>
+              <frontend_type>multiselect</frontend_type>
+              <source_model>adminhtml/system_config_source_payment_allmethods
+              </source_model>
+              <sort_order>30</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>All payment methods that should be exported for prepayment orders.
+              </comment>
+            </payment_methods>
+            <status_open translate="label">
+              <label>Prepayment: Statuses Open</label>
+              <frontend_type>multiselect</frontend_type>
+              <source_model>adminhtml/system_config_source_order_status
+              </source_model>
+              <sort_order>40</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Order statuses that should be exported for prepayment orders (open orders)
+              </comment>
+            </status_open>
+            <status_paid translate="label">
+              <label>Prepayment: Status Paid</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_order_status
+              </source_model>
+              <sort_order>50</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Order state that should be set when a payment has been received for a prepayment order.
+              </comment>
+            </status_paid>
+            <status_cancelled translate="label">
+              <label>Prepayment: Status Cancelled</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_order_status
+              </source_model>
+              <sort_order>55</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Order state that should be set when a prepayment order has been cancelled.
+              </comment>
+            </status_cancelled>
+            <payment_methods_invoice translate="label">
+              <label>Invoice: Payment Methods</label>
+              <frontend_type>multiselect</frontend_type>
+              <source_model>adminhtml/system_config_source_payment_allmethods
+              </source_model>
+              <sort_order>60</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>All payment methods that should be exported for invoice orders.
+              </comment>
+            </payment_methods_invoice>
+            <status_open_invoice translate="label">
+              <label>Invoice: Statuses Open</label>
+              <frontend_type>multiselect</frontend_type>
+              <source_model>adminhtml/system_config_source_order_status
+              </source_model>
+              <sort_order>70</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Order statuses that should be exported for invoice orders (open/unpaid invoices)
+              </comment>
+            </status_open_invoice>
+            <status_paid_invoice translate="label">
+              <label>Invoice: Status Paid</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_order_status
+              </source_model>
+              <sort_order>80</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Order state that should be set an invoice has been paid.
+              </comment>
+            </status_paid_invoice>
+            <status_cancelled_invoice translate="label">
+              <label>Invoice: Status no payment/debt collection</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_order_status
+              </source_model>
+              <sort_order>90</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Order state that should be set when an invoice has not been paid.
+              </comment>
+            </status_cancelled_invoice>
+            <use_invoice_total translate="label">
+              <label>Invoice: use invoice amount</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_enabledisable
+              </source_model>
+              <sort_order>95</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Instead of order amount, use invoice amount for sending out payment information</comment>
+            </use_invoice_total>
+            <consider_creditnotes translate="label">
+              <label>Invoice: subtract credit notes</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_enabledisable
+              </source_model>
+              <sort_order>97</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>If using invoice amount: subtract credit notes from total</comment>
+            </consider_creditnotes>
+            
+            
+            
+            <payment_methods_cod translate="label">
+              <label>COD: Payment Methods</label>
+              <frontend_type>multiselect</frontend_type>
+              <source_model>adminhtml/system_config_source_payment_allmethods
+              </source_model>
+              <sort_order>100</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>All payment methods that should be exported for COD (cash on delivery) orders.
+              </comment>
+            </payment_methods_cod>
+            <status_open_cod translate="label">
+              <label>COD: Statuses Open</label>
+              <frontend_type>multiselect</frontend_type>
+              <source_model>adminhtml/system_config_source_order_status
+              </source_model>
+              <sort_order>110</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Order statuses that should be exported for COD orders (dispatched COD parcel)
+              </comment>
+            </status_open_cod>
+            <status_paid_cod translate="label">
+              <label>COD: Status Paid</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_order_status
+              </source_model>
+              <sort_order>120</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Order state that should be set when a COD order has been paid.
+              </comment>
+            </status_paid_cod>
+            <status_cancelled_cod translate="label">
+              <label>COD: Status Payment unresolved</label>
+              <frontend_type>select</frontend_type>
+              <source_model>adminhtml/system_config_source_order_status
+              </source_model>
+              <sort_order>130</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Order state that should be set when a COD order was not paid.
+              </comment>
+            </status_cancelled_cod>
+            <encryption translate="label">
+              <label>Encryption</label>
+              <frontend_type>text</frontend_type>
+              <!-- 
+              <frontend_type>select</frontend_type>
+              <source_model>ltc_komfortkasse/encryptionoptions</source_model>
+               -->
+              <sort_order>1000</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Encryption technology. Do not change!</comment>
+            </encryption>
+            <accesscode translate="label">
+              <label>Access code</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>1010</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Encrypted access code. Do not change!</comment>
+            </accesscode>
+            <apikey translate="label">
+              <label>API key</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>1020</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>API key. Do not change!</comment>
+            </apikey>            
+            <publickey translate="label">
+              <label>Secret Key 1</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>1030</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Key for encrypting/decrypting data. Do not change!</comment>
+            </publickey>
+            <privatekey translate="label">
+              <label>Secret Key 2</label>
+              <frontend_type>text</frontend_type>
+              <sort_order>1040</sort_order>
+              <show_in_default>1</show_in_default>
+              <show_in_website>1</show_in_website>
+              <show_in_store>1</show_in_store>
+              <comment>Key for encrypting/decrypting data. Do not change!</comment>
+              <disabled>true</disabled>
+            </privatekey>
+          </fields>
+        </komfortkasse>
+      </groups>
+    </payment>
+  </sections>
+</config>
