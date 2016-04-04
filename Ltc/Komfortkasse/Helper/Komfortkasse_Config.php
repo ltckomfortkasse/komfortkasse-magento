@@ -3,7 +3,7 @@
 /**
  * Komfortkasse
  * Config Class
- * @version 1.4.4.11-Magento */
+ * @version 1.4.4.13-Magento */
 class Komfortkasse_Config
 {
     const activate_export = 'payment/komfortkasse/activate_export';
@@ -60,7 +60,7 @@ class Komfortkasse_Config
     public static function getConfig($constantKey, $order=null)
     {
         $store_id = null;
-        if ($order != null) {
+        if ($order != null && isset($order['store_id'])) {
             $store_id = $order['store_id'];
         } else {
             // export und update werden in den getId Methoden nochmals extra ber�cksichtigt.

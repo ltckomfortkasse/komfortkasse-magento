@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.4.4.12-Magento1
+ * @version 1.4.4.13-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -183,6 +183,7 @@ class Komfortkasse_Order
         $conf_general = Mage::getStoreConfig('general', $order->getStoreId());
 
         $ret = array ();
+        $ret ['invoice_date'] = null;
         $ret ['number'] = $order->getIncrementId();
         $ret ['status'] = $order->getStatus();
         $ret ['date'] = date('d.m.Y', strtotime($order->getCreatedAtStoreDate()->get(Zend_Date::DATE_MEDIUM)));
