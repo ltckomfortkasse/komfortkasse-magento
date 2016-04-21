@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.4.4.13-Magento1
+ * @version 1.4.4.14-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -183,6 +183,7 @@ class Komfortkasse_Order
         $conf_general = Mage::getStoreConfig('general', $order->getStoreId());
 
         $ret = array ();
+        $ret ['store_id'] = $order->getStoreId();
         $ret ['invoice_date'] = null;
         $ret ['number'] = $order->getIncrementId();
         $ret ['status'] = $order->getStatus();
@@ -198,8 +199,8 @@ class Komfortkasse_Order
         $ret ['exchange_rate'] = $order->getBaseToOrderRate();
 
         // Rechnungsnummer und -datum, evtl. Rechnungsbetrag
-        $useInvoiceAmount = Komfortkasse::getOrderType($ret) == 'INVOICE' && Komfortkasse_Config::getConfig(Komfortkasse_Config::use_invoice_total);
-        $considerCreditnotes = $useInvoiceAmount && Komfortkasse_Config::getConfig(Komfortkasse_Config::consider_creditnotes);
+        $useInvoiceAmount = Komfortkasse::getOrderType($ret) == 'INVOICE' && Komfortkasse_Config::getConfig(Komfortkasse_Config::use_invoice_total, $ret);
+        $considerCreditnotes = $useInvoiceAmount && Komfortkasse_Config::getConfig(Komfortkasse_Config::consider_creditnotes, $ret);
         $invoiceColl = $order->getInvoiceCollection();
         if ($invoiceColl->getSize() > 0) {
             $amount = 0.0;
@@ -257,8 +258,6 @@ class Komfortkasse_Order
                 $ret ['products'] [] = $item->getName();
             }
         }
-
-        $ret ['store_id'] = $order->getStoreId();
 
         global $komfortkasse_order_extension;
         if ($komfortkasse_order_extension && method_exists('Komfortkasse_Order_Extension', 'extendOrder') === true) {
