@@ -3,7 +3,7 @@
 /**
  * Komfortkasse
  * Config Class
- * @version 1.4.4.13-Magento */
+ * @version 1.4.4.15-Magento */
 class Komfortkasse_Config
 {
     const activate_export = 'payment/komfortkasse/activate_export';
@@ -27,6 +27,8 @@ class Komfortkasse_Config
     const privatekey = 'payment/komfortkasse/privatekey';
     const use_invoice_total = 'payment/komfortkasse/use_invoice_total';
     const consider_creditnotes = 'payment/komfortkasse/consider_creditnotes';
+    const creditnotes_as_invoices = 'payment/komfortkasse/creditnotes_as_invoices';
+    const last_receipt_only = 'payment/komfortkasse/last_receipt_only';
 
 
     /**
