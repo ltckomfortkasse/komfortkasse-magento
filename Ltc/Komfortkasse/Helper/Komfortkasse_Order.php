@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.4.4.16-Magento1
+ * @version 1.6.2-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -53,82 +53,91 @@ class Komfortkasse_Order
 
         $m2e = Mage::getModel('M2ePro/Order');
 
+        $shopIds = Komfortkasse_Config::getRequestParameter('s');
+        if ($shopIds)
+            $shopIds = Komfortkasse::kkdecrypt($shopIds);
+        $store_codes = $shopIds ? explode(',', $shopIds) : array ();
+
         foreach (Mage::app()->getWebsites() as $website) {
             foreach ($website->getGroups() as $group) {
                 $stores = $group->getStores();
                 foreach ($stores as $store) {
-                    $store_id = $store->getId();
-                    $store_id_order = array ();
-                    $store_id_order ['store_id'] = $store_id;
+                    $store_code = $store->getCode();
+                    if (empty($store_codes) || in_array($store_code, $store_codes)) {
 
-                    if (Komfortkasse_Config::getConfig(Komfortkasse_Config::activate_export, $store_id_order)) {
+                        $store_id = $store->getId();
+                        $store_id_order = array ();
+                        $store_id_order ['store_id'] = $store_id;
 
-                        $m2e_active = $m2e && Komfortkasse_Config::getConfig('payment/m2epropayment/active', $store_id_order);
+                        if (Komfortkasse_Config::getConfig(Komfortkasse_Config::activate_export, $store_id_order)) {
 
-                        $query = 'SELECT o.increment_id FROM ' . $tableOrder . ' o join ' . $tablePayment . ' p on p.parent_id = o.entity_id';
-                        if ($m2e_active)
-                            $query .= ' left join ' . $resource->getTableName('M2ePro/Order') . ' m on m.magento_order_id=o.entity_id left join ' . $resource->getTableName('M2ePro/Ebay_Order') . ' e on e.order_id=m.id ';
+                            $m2e_active = $m2e && Komfortkasse_Config::getConfig('payment/m2epropayment/active', $store_id_order);
 
-                        $query .= ' where o.store_id=' . $store_id . ' and created_at > ' . $minDate . ' and (';
-                        $first = true;
-                        $m2e_used = false;
+                            $query = 'SELECT o.increment_id FROM ' . $tableOrder . ' o join ' . $tablePayment . ' p on p.parent_id = o.entity_id';
+                            if ($m2e_active)
+                                $query .= ' left join ' . $resource->getTableName('M2ePro/Order') . ' m on m.magento_order_id=o.entity_id left join ' . $resource->getTableName('M2ePro/Ebay_Order') . ' e on e.order_id=m.id ';
 
-                        // PREPAYMENT
-                        $openOrders = Komfortkasse_Config::getConfig(Komfortkasse_Config::status_open, $store_id_order);
-                        $paymentMethods = Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods, $store_id_order);
-                        if ($openOrders && $paymentMethods) {
-                            if (!$first)
-                                $query .= ' or ';
-                            $query .= '(o.status in ' . self::createInClause($openOrders) . ' and p.method in ' . self::createInClause($paymentMethods);
+                            $query .= ' where o.store_id=' . $store_id . ' and created_at > ' . $minDate . ' and (';
+                            $first = true;
+                            $m2e_used = false;
 
-                            if ($m2e_active && !$m2e_used && strstr($paymentMethods, 'm2epropayment') !== false) {
-                                $query .= ' and (p.method <> \'m2epropayment\' or e.payment_details like \'%"method":"%berweisung"%\') ';
-                                $m2e_used = true;
+                            // PREPAYMENT
+                            $openOrders = Komfortkasse_Config::getConfig(Komfortkasse_Config::status_open, $store_id_order);
+                            $paymentMethods = Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods, $store_id_order);
+                            if ($openOrders && $paymentMethods) {
+                                if (!$first)
+                                    $query .= ' or ';
+                                $query .= '(o.status in ' . self::createInClause($openOrders) . ' and p.method in ' . self::createInClause($paymentMethods);
+
+                                if ($m2e_active && !$m2e_used && strstr($paymentMethods, 'm2epropayment') !== false) {
+                                    $query .= ' and (p.method <> \'m2epropayment\' or e.payment_details like \'%"method":"%berweisung"%\') ';
+                                    $m2e_used = true;
+                                }
+
+                                $query .= ')';
+                                $first = false;
+                            }
+
+                            // COD
+                            $openOrders = Komfortkasse_Config::getConfig(Komfortkasse_Config::status_open_cod, $store_id_order);
+                            $paymentMethods = Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_cod, $store_id_order);
+                            if ($openOrders && $paymentMethods) {
+                                if (!$first)
+                                    $query .= ' or ';
+                                $query .= '(o.status in ' . self::createInClause($openOrders) . ' and p.method in ' . self::createInClause($paymentMethods);
+
+                                if ($m2e_active && !$m2e_used && strstr($paymentMethods, 'm2epropayment') !== false) {
+                                    $query .= ' and (p.method <> \'m2epropayment\' or e.payment_details like \'%"method":"Nachnahme"%\') ';
+                                    $m2e_used = true;
+                                }
+
+                                $query .= ')';
+                                $first = false;
+                            }
+
+                            // INVOICE
+                            $openOrders = Komfortkasse_Config::getConfig(Komfortkasse_Config::status_open_invoice, $store_id_order);
+                            $paymentMethods = Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_invoice, $store_id_order);
+                            if ($openOrders && $paymentMethods) {
+                                if (!$first)
+                                    $query .= ' or ';
+                                $query .= '(o.status in ' . self::createInClause($openOrders) . ' and p.method in ' . self::createInClause($paymentMethods);
+
+                                if ($m2e_active && !$m2e_used && strstr($paymentMethods, 'm2epropayment') !== false) {
+                                    $query .= ' and (p.method <> \'m2epropayment\' or e.payment_details like \'%"method":"Rechnung"%\') ';
+                                    $m2e_used = true;
+                                }
+
+                                $query .= ')';
+                                $first = false;
                             }
 
                             $query .= ')';
-                            $first = false;
-                        }
 
-                        // COD
-                        $openOrders = Komfortkasse_Config::getConfig(Komfortkasse_Config::status_open_cod, $store_id_order);
-                        $paymentMethods = Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_cod, $store_id_order);
-                        if ($openOrders && $paymentMethods) {
-                            if (!$first)
-                                $query .= ' or ';
-                            $query .= '(o.status in ' . self::createInClause($openOrders) . ' and p.method in ' . self::createInClause($paymentMethods);
-
-                            if ($m2e_active && !$m2e_used && strstr($paymentMethods, 'm2epropayment') !== false) {
-                                $query .= ' and (p.method <> \'m2epropayment\' or e.payment_details like \'%"method":"Nachnahme"%\') ';
-                                $m2e_used = true;
+                            $results = $readConnection->fetchAll($query);
+                            foreach ($results as $result) {
+                                $ret [] = $result ['increment_id'];
                             }
-
-                            $query .= ')';
-                            $first = false;
-                        }
-
-                        // INVOICE
-                        $openOrders = Komfortkasse_Config::getConfig(Komfortkasse_Config::status_open_invoice, $store_id_order);
-                        $paymentMethods = Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_invoice, $store_id_order);
-                        if ($openOrders && $paymentMethods) {
-                            if (!$first)
-                                $query .= ' or ';
-                            $query .= '(o.status in ' . self::createInClause($openOrders) . ' and p.method in ' . self::createInClause($paymentMethods);
-
-                            if ($m2e_active && !$m2e_used && strstr($paymentMethods, 'm2epropayment') !== false) {
-                                $query .= ' and (p.method <> \'m2epropayment\' or e.payment_details like \'%"method":"Rechnung"%\') ';
-                                $m2e_used = true;
-                            }
-
-                            $query .= ')';
-                            $first = false;
-                        }
-
-                        $query .= ')';
-
-                        $results = $readConnection->fetchAll($query);
-                        foreach ($results as $result) {
-                            $ret [] = $result ['increment_id'];
                         }
                     }
                 }
@@ -334,7 +343,7 @@ class Komfortkasse_Order
         }
 
         $m2e = Mage::getModel('M2ePro/Order');
-        if ($m2e->load($order->getEntityId(), 'magento_order_id')) {
+        if ($m2e && $m2e->load($order->getEntityId(), 'magento_order_id')) {
             $ebay = Mage::getModel('M2ePro/Ebay_Order');
             if ($ebay->load($m2e->getId(), 'order_id')) {
                 $ret ['marketplace_number'] = $ebay->getEbayOrderId();
@@ -591,7 +600,6 @@ class Komfortkasse_Order
                         $content = $pdf->render();
                     }
                 }
-
             }
 
 

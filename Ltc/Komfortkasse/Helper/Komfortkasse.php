@@ -8,7 +8,7 @@ require_once 'Komfortkasse_Order.php';
  */
 class Komfortkasse
 {
-    const PLUGIN_VER = '1.4.4.16';
+    const PLUGIN_VER = '1.6.2';
     const MAXLEN_SSL = 117;
     const LEN_MCRYPT = 16;
 
@@ -50,6 +50,7 @@ class Komfortkasse
      */
     public static function read($refunds)
     {
+
         if (!Komfortkasse_Config::getConfig(Komfortkasse_Config::activate_export)) {
             return;
         }
@@ -168,6 +169,7 @@ class Komfortkasse
         Komfortkasse::output('encryption:');
         $encryptionstring = null;
         // Look for openssl encryption.
+
         if (extension_loaded('openssl') === true) {
 
             // Look for public&privatekey encryption.
@@ -293,8 +295,10 @@ class Komfortkasse
 
         $o = '';
         $lines = explode("\n", $param);
+
         foreach ($lines as $line) {
             $col = explode(';', $line);
+
             $count = Komfortkasse::mycount($col);
             $id = trim($col [0]);
             if ($count > 1) {
@@ -316,6 +320,7 @@ class Komfortkasse
             if ($refunds === true) {
                 Komfortkasse_Order::updateRefund($id, $status, $callbackid);
             } else {
+
                 $order = Komfortkasse_Order::getOrder($id);
                 if ($id != $order ['number']) {
                     continue;
@@ -371,7 +376,7 @@ class Komfortkasse
                 return false;
         }
 
-        return in_array($order['status'], explode(',', $status));
+        return in_array($order['status'], explode(',', trim(str_replace('"', '', $status))));
     }
 
     /**
@@ -390,6 +395,9 @@ class Komfortkasse
         $order = Komfortkasse_Order::getOrder($id);
         $order['type'] = self::getOrderType($order);
 
+        if (!Komfortkasse_Config::getConfig(Komfortkasse_Config::activate_export, $order)) {
+            return;
+        }
         // See if order is relevant.
         if (!self::isOpen($order)) {
             return;
@@ -399,7 +407,7 @@ class Komfortkasse
 
         $queryEnc = Komfortkasse::kkencrypt($queryRaw);
 
-        $query = http_build_query(array ('q' => $queryEnc,'hash' => Komfortkasse_Config::getConfig(Komfortkasse_Config::accesscode),'key' => Komfortkasse_Config::getConfig(Komfortkasse_Config::apikey)
+        $query = http_build_query(array ('q' => $queryEnc,'hash' => Komfortkasse_Config::getConfig(Komfortkasse_Config::accesscode, $order),'key' => Komfortkasse_Config::getConfig(Komfortkasse_Config::apikey, $order)
         ));
 
         $contextData = array ('method' => 'POST','timeout' => 2,'header' => "Connection: close\r\n" . 'Content-Length: ' . strlen($query) . "\r\n",'content' => $query
@@ -454,6 +462,7 @@ class Komfortkasse
      */
     protected static function getNewStatus($status, $order)
     {
+
         $orderType = self::getOrderType($order);
 
         switch ($orderType) {
@@ -554,7 +563,7 @@ class Komfortkasse
      *
      * @return Ambigous <boolean, string>|string
      */
-    protected static function kkdecrypt($s, $encryption = null, $keystring = null)
+    public static function kkdecrypt($s, $encryption = null, $keystring = null)
     {
         if (!$encryption) {
             $encryption = Komfortkasse_Config::getConfig(Komfortkasse_Config::encryption);
@@ -829,14 +838,13 @@ class Komfortkasse
 
     public static function getOrderType($order) {
         $payment_method = $order['payment_method'];
-
-        $paycodes = preg_split('/,/', Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods, $order));
+        $paycodes = preg_split('/,/', trim(str_replace('"','',Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods, $order))));
         if (in_array($payment_method, $paycodes))
             return 'PREPAYMENT';
-        $paycodes = preg_split('/,/', Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_invoice, $order));
+        $paycodes = preg_split('/,/', trim(str_replace('"','',Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_invoice, $order))));
         if (in_array($payment_method, $paycodes))
             return 'INVOICE';
-        $paycodes = preg_split('/,/', Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_cod, $order));
+        $paycodes = preg_split('/,/', trim(str_replace('"','',Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_cod, $order))));
         if (in_array($payment_method, $paycodes))
             return 'COD';
         return '';
