@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.6.2-Magento1
+ * @version 1.6.3-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -133,10 +133,11 @@ class Komfortkasse_Order
                             }
 
                             $query .= ')';
-
-                            $results = $readConnection->fetchAll($query);
-                            foreach ($results as $result) {
-                                $ret [] = $result ['increment_id'];
+                            if (!$first) { // nur wenn min. eine teil-query angehängt wurde
+                                $results = $readConnection->fetchAll($query);
+                                foreach ($results as $result) {
+                                    $ret [] = $result ['increment_id'];
+                                }
                             }
                         }
                     }
