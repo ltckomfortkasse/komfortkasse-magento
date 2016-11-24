@@ -37,7 +37,7 @@
    "extra":{
    		"map":[
    			["Ltc_Komfortkasse.xml", "app/etc/modules/Ltc_Komfortkasse.xml"],
-			["Komfortkasse", "app/code/community/Ltc/Komfortkasse"]
+			["Ltc/Komfortkasse", "app/code/community/Ltc/Komfortkasse"]
 		]
    }    
 }
