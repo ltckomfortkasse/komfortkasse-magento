@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.6.3-Magento1
+ * @version 1.7.2-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -161,6 +161,8 @@ class Komfortkasse_Order
     {
         $ret = array ();
 
+        $minDate = date('Y-m-d', time() - 31536000); // 1 Jahr
+
         foreach (Mage::app()->getWebsites() as $website) {
             foreach ($website->getGroups() as $group) {
                 $stores = $group->getStores();
@@ -178,7 +180,7 @@ class Komfortkasse_Order
                     $paymentMethodsInvoice = explode(',', Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_invoice, $store_id_order));
 
                     $cmModel = Mage::getModel("sales/order_creditmemo");
-                    $cmCollection = $cmModel->getCollection()->addFieldToFilter('store_id', $store_id);
+                    $cmCollection = $cmModel->getCollection()->addFieldToFilter('store_id', $store_id)->addAttributeToFilter('created_at', array('gt' => $minDate));
 
                     foreach ($cmCollection as $creditMemo) {
                         if ($creditMemo->getTransactionId() == null) {
@@ -608,4 +610,35 @@ class Komfortkasse_Order
         }
 
     }
+
+    public static function isOpen($order)
+    {
+        if ($order['payment_method'] == 'm2epropayment') {
+            // m2e Bestellung nur relevant wenn eBay-Zahlungsart passend
+            $mage = Mage::getModel('sales/order')->loadByIncrementId($order['number']);
+            $m2e = Mage::getModel('M2ePro/Order');
+            if ($m2e && $m2e->load($mage->getEntityId(), 'magento_order_id')) {
+                $ebay = Mage::getModel('M2ePro/Ebay_Order');
+                if ($ebay->load($m2e->getId(), 'order_id')) {
+                    $ebay_method = $ebay->getPaymentMethod();
+
+                    $paymentMethods = Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods, $order);
+                    if (strstr($paymentMethods, 'm2epropayment') !== false) {
+                        return strstr($ebay_method, 'berweisung') !== false;
+                    }
+                    $paymentMethods = Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_cod, $order);
+                    if (strstr($paymentMethods, 'm2epropayment') !== false) {
+                        return strstr($ebay_method, 'Nachnahme') !== false;
+                    }
+                    $paymentMethods = Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods, $order);
+                    if (strstr($paymentMethods, 'm2epropayment') !== false) {
+                        return strstr($ebay_method, 'Rechnung') !== false;
+                    }
+
+                }
+            }
+        }
+    }
+
+
 }//end class
