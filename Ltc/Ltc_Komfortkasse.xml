@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+ Komfortkasse
+ Magento Plugin - plugin xml file
+-->
+ <config>
+  <modules>
+    <Ltc_Komfortkasse>
+      <active>true</active>
+      <codePool>community</codePool>
+    </Ltc_Komfortkasse>
+  </modules>
+</config>
