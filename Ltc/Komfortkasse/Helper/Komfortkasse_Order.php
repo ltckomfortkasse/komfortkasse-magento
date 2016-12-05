@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.7.2-Magento1
+ * @version 1.7.3-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -51,7 +51,7 @@ class Komfortkasse_Order
 
         $minDate = date('Y-m-d', time() - 31536000); // 1 Jahr
 
-        $m2e = Mage::getModel('M2ePro/Order');
+        $m2e = Mage::helper('core')->isModuleEnabled('Ess_M2ePro') ? Mage::getModel('M2ePro/Order') : null;
 
         $shopIds = Komfortkasse_Config::getRequestParameter('s');
         if ($shopIds)
@@ -345,7 +345,7 @@ class Komfortkasse_Order
             }
         }
 
-        $m2e = Mage::getModel('M2ePro/Order');
+        $m2e = Mage::helper('core')->isModuleEnabled('Ess_M2ePro') ? Mage::getModel('M2ePro/Order') : null;
         if ($m2e && $m2e->load($order->getEntityId(), 'magento_order_id')) {
             $ebay = Mage::getModel('M2ePro/Ebay_Order');
             if ($ebay->load($m2e->getId(), 'order_id')) {
@@ -616,7 +616,7 @@ class Komfortkasse_Order
         if ($order['payment_method'] == 'm2epropayment') {
             // m2e Bestellung nur relevant wenn eBay-Zahlungsart passend
             $mage = Mage::getModel('sales/order')->loadByIncrementId($order['number']);
-            $m2e = Mage::getModel('M2ePro/Order');
+            $m2e = Mage::helper('core')->isModuleEnabled('Ess_M2ePro') ? Mage::getModel('M2ePro/Order') : null;
             if ($m2e && $m2e->load($mage->getEntityId(), 'magento_order_id')) {
                 $ebay = Mage::getModel('M2ePro/Ebay_Order');
                 if ($ebay->load($m2e->getId(), 'order_id')) {
