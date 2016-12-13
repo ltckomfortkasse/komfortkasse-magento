@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.7.3-Magento1
+ * @version 1.7.4-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -52,6 +52,7 @@ class Komfortkasse_Order
         $minDate = date('Y-m-d', time() - 31536000); // 1 Jahr
 
         $m2e = Mage::helper('core')->isModuleEnabled('Ess_M2ePro') ? Mage::getModel('M2ePro/Order') : null;
+        global $komfortkasse_order_extension;
 
         $shopIds = Komfortkasse_Config::getRequestParameter('s');
         if ($shopIds)
@@ -76,6 +77,8 @@ class Komfortkasse_Order
                             $query = 'SELECT o.increment_id FROM ' . $tableOrder . ' o join ' . $tablePayment . ' p on p.parent_id = o.entity_id';
                             if ($m2e_active)
                                 $query .= ' left join ' . $resource->getTableName('M2ePro/Order') . ' m on m.magento_order_id=o.entity_id left join ' . $resource->getTableName('M2ePro/Ebay_Order') . ' e on e.order_id=m.id ';
+                            if ($komfortkasse_order_extension && method_exists('Komfortkasse_Order_Extension', 'extendOpenIDsQueryJoin') === true)
+                                $query .= Komfortkasse_Order_Extension::extendOpenIDsQueryJoin($resource);
 
                             $query .= ' where o.store_id=' . $store_id . ' and created_at > ' . $minDate . ' and (';
                             $first = true;
@@ -92,6 +95,11 @@ class Komfortkasse_Order
                                 if ($m2e_active && !$m2e_used && strstr($paymentMethods, 'm2epropayment') !== false) {
                                     $query .= ' and (p.method <> \'m2epropayment\' or e.payment_details like \'%"method":"%berweisung"%\') ';
                                     $m2e_used = true;
+                                }
+                                if ($komfortkasse_order_extension && method_exists('Komfortkasse_Order_Extension', 'extendOpenIDsQueryWhere') === true) {
+                                    $queryExtended = Komfortkasse_Order_Extension::extendOpenIDsQueryWhere('PREPAYMENT');
+                                    if ($queryExtended)
+                                        $query .= ' and ( ' . $queryExtended . ' )';
                                 }
 
                                 $query .= ')';
@@ -110,6 +118,11 @@ class Komfortkasse_Order
                                     $query .= ' and (p.method <> \'m2epropayment\' or e.payment_details like \'%"method":"Nachnahme"%\') ';
                                     $m2e_used = true;
                                 }
+                                if ($komfortkasse_order_extension && method_exists('Komfortkasse_Order_Extension', 'extendOpenIDsQueryWhere') === true) {
+                                    $queryExtended = Komfortkasse_Order_Extension::extendOpenIDsQueryWhere('COD');
+                                    if ($queryExtended)
+                                        $query .= ' and ( ' . $queryExtended . ' )';
+                                }
 
                                 $query .= ')';
                                 $first = false;
@@ -126,6 +139,11 @@ class Komfortkasse_Order
                                 if ($m2e_active && !$m2e_used && strstr($paymentMethods, 'm2epropayment') !== false) {
                                     $query .= ' and (p.method <> \'m2epropayment\' or e.payment_details like \'%"method":"Rechnung"%\') ';
                                     $m2e_used = true;
+                                }
+                                if ($komfortkasse_order_extension && method_exists('Komfortkasse_Order_Extension', 'extendOpenIDsQueryWhere') === true) {
+                                    $queryExtended = Komfortkasse_Order_Extension::extendOpenIDsQueryWhere('INVOICE');
+                                    if ($queryExtended)
+                                        $query .= ' and ( ' . $queryExtended . ' )';
                                 }
 
                                 $query .= ')';
@@ -180,7 +198,8 @@ class Komfortkasse_Order
                     $paymentMethodsInvoice = explode(',', Komfortkasse_Config::getConfig(Komfortkasse_Config::payment_methods_invoice, $store_id_order));
 
                     $cmModel = Mage::getModel("sales/order_creditmemo");
-                    $cmCollection = $cmModel->getCollection()->addFieldToFilter('store_id', $store_id)->addAttributeToFilter('created_at', array('gt' => $minDate));
+                    $cmCollection = $cmModel->getCollection()->addFieldToFilter('store_id', $store_id)->addAttributeToFilter('created_at', array ('gt' => $minDate
+                    ));
 
                     foreach ($cmCollection as $creditMemo) {
                         if ($creditMemo->getTransactionId() == null) {
@@ -611,11 +630,12 @@ class Komfortkasse_Order
 
     }
 
+
     public static function isOpen($order)
     {
-        if ($order['payment_method'] == 'm2epropayment') {
+        if ($order ['payment_method'] == 'm2epropayment') {
             // m2e Bestellung nur relevant wenn eBay-Zahlungsart passend
-            $mage = Mage::getModel('sales/order')->loadByIncrementId($order['number']);
+            $mage = Mage::getModel('sales/order')->loadByIncrementId($order ['number']);
             $m2e = Mage::helper('core')->isModuleEnabled('Ess_M2ePro') ? Mage::getModel('M2ePro/Order') : null;
             if ($m2e && $m2e->load($mage->getEntityId(), 'magento_order_id')) {
                 $ebay = Mage::getModel('M2ePro/Ebay_Order');
@@ -634,11 +654,14 @@ class Komfortkasse_Order
                     if (strstr($paymentMethods, 'm2epropayment') !== false) {
                         return strstr($ebay_method, 'Rechnung') !== false;
                     }
-
                 }
             }
         }
+
+        global $komfortkasse_order_extension;
+        if ($komfortkasse_order_extension && method_exists('Komfortkasse_Order_Extension', 'isOpen') === true) {
+            $ret = Komfortkasse_Order_Extension::isOpen($order);
+        }
+
     }
-
-
 }//end class
