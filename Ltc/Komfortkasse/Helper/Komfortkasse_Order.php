@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.7.4-Magento1
+ * @version 1.7.6-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -573,7 +573,7 @@ class Komfortkasse_Order
 
                 // try easy pdf (www.easypdfinvoice.com)
                 if (!$pdfGenerated) {
-                    $pdfProModel = Mage::getModel('pdfpro/order_invoice');
+                    $pdfProModel = Mage::helper('core')->isModuleEnabled('VES_PdfPro') ? Mage::getModel('pdfpro/order_invoice') : false;
                     if ($pdfProModel !== false) {
                         $invoiceData = $pdfProModel->initInvoiceData($invoice);
                         $result = Mage::helper('pdfpro')->initPdf(array ($invoiceData
@@ -591,6 +591,7 @@ class Komfortkasse_Order
                     ));
                     $content = $pdf->render();
                 }
+
             } else if (Komfortkasse_Config::getConfig(Komfortkasse_Config::creditnotes_as_invoices, self::getOrder($orderNumber))) {
 
                 // try credit note
@@ -603,14 +604,14 @@ class Komfortkasse_Order
 
                     // try easy pdf (www.easypdfinvoice.com)
                     if (!$pdfGenerated) {
-                        $pdfProModel = Mage::getModel('pdfpro/order_creditmemo');
+                        $pdfProModel = $pdfProModel = Mage::helper('core')->isModuleEnabled('VES_PdfPro') ? Mage::getModel('pdfpro/order_creditmemo') : false;
                         if ($pdfProModel !== false) {
                             $creditData = $pdfProModel->initCreditmemoData($credit);
                             $result = Mage::helper('pdfpro')->initPdf(array ($creditData
                             ));
                             if ($result ['success']) {
                                 $content = $result ['content'];
-                                // $pdfGenerated = true;
+                                $pdfGenerated = true;
                             }
                         }
                     }
@@ -623,7 +624,6 @@ class Komfortkasse_Order
                     }
                 }
             }
-
 
             return $content;
         }

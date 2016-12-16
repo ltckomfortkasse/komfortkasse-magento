@@ -1,9 +1,9 @@
 <?php
-/** 
+/**
  * Komfortkasse
  * Magento Plugin - MainController
- * 
- * @version 1.2.3.2-Magento */
+ *
+ * @version 1.7.6-Magento */
 class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
 {
 
@@ -15,12 +15,12 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
      */
     public function initAction()
     {
-        self::getHelper()->init();
-    
+        $this->getResponse()->setBody(self::getHelper()->init());
+
     }
 
  // end initAction()
-    
+
 
     /**
      * Test.
@@ -29,12 +29,12 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
      */
     public function testAction()
     {
-        self::getHelper()->test();
-    
+        $this->getResponse()->setBody(self::getHelper()->test());
+
     }
 
  // end testAction()
-    
+
 
     /**
      * Read orders.
@@ -43,12 +43,12 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
      */
     public function readordersAction()
     {
-        self::getHelper()->readorders();
-    
+        $this->getResponse()->setBody(self::getHelper()->readorders());
+
     }
 
  // end readordersAction()
-    
+
 
     /**
      * Read refunds.
@@ -57,12 +57,12 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
      */
     public function readrefundsAction()
     {
-        self::getHelper()->readrefunds();
-    
+        $this->getResponse()->setBody(self::getHelper()->readrefunds());
+
     }
 
  // end readrefundsAction()
-    
+
 
     /**
      * Update orders.
@@ -71,12 +71,12 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
      */
     public function updateordersAction()
     {
-        self::getHelper()->updateorders();
-    
+        $this->getResponse()->setBody(self::getHelper()->updateorders());
+
     }
 
  // end updateordersAction()
-    
+
 
     /**
      * Update refunds.
@@ -85,12 +85,12 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
      */
     public function updaterefundsAction()
     {
-        self::getHelper()->updaterefunds();
-    
+        $this->getResponse()->setBody(self::getHelper()->updaterefunds());
+
     }
 
  // end updaterefundsAction()
-    
+
 
     /**
      * Info.
@@ -99,12 +99,12 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
      */
     public function infoAction()
     {
-        self::getHelper()->info();
-    
+        $this->getResponse()->setBody(self::getHelper()->info());
+
     }
 
  // end infoAction()
-    
+
 
     /**
      * Get Helper.
@@ -114,7 +114,7 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
     protected function getHelper()
     {
         return Mage::helper('Ltc_Komfortkasse');
-    
+
     }
 
  // end getHelper()
@@ -123,10 +123,10 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
         $content = self::getHelper()->readinvoicepdf();
         if (!$content)
             return;
-        
+
         $contentType = 'application/pdf';
         $contentLength = strlen($content);
-        
+
         $this->getResponse()->setHttpResponseCode(200)->setHeader('Pragma', 'public', true)->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0', true)->setHeader('Content-type', $contentType, true)->setHeader('Content-Length', $contentLength, true)->setHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"', true)->setHeader('Last-Modified', date('r'), true);
         $this->getResponse()->setBody($content);
     }

@@ -1,11 +1,12 @@
 <?php
-
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 require_once "{$path}/Helper/Komfortkasse.php";
 /**
  * Komfortkasse
  * Magento Plugin - Helper_Data Class
- * @version 1.3.0.6-Magento */
+ *
+ * @version 1.7.6-Magento
+ */
 class Ltc_Komfortkasse_Helper_Data extends Mage_Core_Helper_Abstract
 {
 
@@ -17,9 +18,11 @@ class Ltc_Komfortkasse_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function init()
     {
-        Komfortkasse::init();
+        return Komfortkasse::init();
 
-    }//end init()
+    }
+
+ // end init()
 
 
     /**
@@ -29,9 +32,11 @@ class Ltc_Komfortkasse_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function test()
     {
-        Komfortkasse::test();
+        return Komfortkasse::test();
 
-    }//end test()
+    }
+
+ // end test()
 
 
     /**
@@ -41,9 +46,11 @@ class Ltc_Komfortkasse_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function readorders()
     {
-        Komfortkasse::readorders();
+        return Komfortkasse::readorders();
 
-    }//end readorders()
+    }
+
+ // end readorders()
 
 
     /**
@@ -53,9 +60,11 @@ class Ltc_Komfortkasse_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function readrefunds()
     {
-        Komfortkasse::readrefunds();
+        return Komfortkasse::readrefunds();
 
-    }//end readrefunds()
+    }
+
+ // end readrefunds()
 
 
     /**
@@ -65,9 +74,11 @@ class Ltc_Komfortkasse_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function updateorders()
     {
-        Komfortkasse::updateorders();
+        return Komfortkasse::updateorders();
 
-    }//end updateorders()
+    }
+
+ // end updateorders()
 
 
     /**
@@ -77,9 +88,11 @@ class Ltc_Komfortkasse_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function updaterefunds()
     {
-        Komfortkasse::updaterefunds();
+        return Komfortkasse::updaterefunds();
 
-    }//end updaterefunds()
+    }
+
+ // end updaterefunds()
 
 
     /**
@@ -89,9 +102,11 @@ class Ltc_Komfortkasse_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function info()
     {
-        Komfortkasse::info();
+        return Komfortkasse::info();
 
-    }//end info()
+    }
+
+ // end info()
 
     /**
      * Notify order.
@@ -100,16 +115,14 @@ class Ltc_Komfortkasse_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function notifyorder($id)
     {
-        Komfortkasse::notifyorder($id);
+        return Komfortkasse::notifyorder($id);
 
-    }//end notifyorder()
-
-
-    public function readinvoicepdf() {
-        return Komfortkasse::readinvoicepdf();
     }
 
+ // end notifyorder()
+    public function readinvoicepdf()
+    {
+        return Komfortkasse::readinvoicepdf();
 
-
-
+    }
 }//end class

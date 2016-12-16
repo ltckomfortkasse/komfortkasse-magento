@@ -3,7 +3,7 @@
 /**
  * Komfortkasse
  * Config Class
- * @version 1.7.2-Magento */
+ * @version 1.7.6-Magento */
 class Komfortkasse_Config
 {
     const activate_export = 'payment/komfortkasse/activate_export';
@@ -112,7 +112,7 @@ class Komfortkasse_Config
 
     public static function output($s)
     {
-        echo $s;
+        return $s;
     }
 
 }//end class
