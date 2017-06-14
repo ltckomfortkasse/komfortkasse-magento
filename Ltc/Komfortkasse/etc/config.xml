@@ -3,7 +3,7 @@
 <config>
   <modules>
     <Ltc_Komfortkasse>
-      <version>1.7.5</version>
+      <version>1.7.7</version>
     </Ltc_Komfortkasse>
   </modules>
   <global>
@@ -63,6 +63,7 @@
         <creditnotes_as_invoices>0</creditnotes_as_invoices>
         <last_receipt_only>0</last_receipt_only>
         <status_open_cod>processing</status_open_cod>
+        <set_invoices_paid>1</set_invoices_paid>
       </komfortkasse>
     </payment>
   </default>

@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.7.6-Magento1
+ * @version 1.7.7-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -446,8 +446,7 @@ class Komfortkasse_Order
         if ($state == 'processing' || $state == 'closed' || $state == 'complete') {
 
             // If there is already an invoice, update the invoice, not the order.
-            $invoiceColl = $order->getInvoiceCollection();
-            if ($invoiceColl->getSize() > 0) {
+            if (Komfortkasse_Config::getConfig(Komfortkasse_Config::set_invoices_paid, $order) && $order->getInvoiceCollection()->getSize() > 0) {
                 foreach ($order->getInvoiceCollection() as $invoice) {
                     Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' invoice ' . $invoice->getIncrementId() . ' pay', null, 'komfortkasse.log');
                     $invoice->pay();
