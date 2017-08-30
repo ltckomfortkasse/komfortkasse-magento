@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.7.7-Magento1
+ * @version 1.7.8-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -432,7 +432,30 @@ class Komfortkasse_Order
         }
 
         // Hint: PAID and CANCELLED are supported as of now.
-        $order = Mage::getModel('sales/order')->loadByIncrementId($order ['number']);
+
+        if (substr($order ['number'], 11) == 'ricardo.ch:') {
+            // magnalister bestellung von ricardo.ch, 'echte' nummer ermitteln
+
+            $transaction = substr($order ['number'], strpos($order ['number'], '-'));
+
+            $resource = Mage::getSingleton('core/resource');
+            $tableOrderHistory = $resource->getTableName('sales/order_status_history');
+            $query = "SELECT o.parent_id, o.comment FROM $tableOrderHistory o where o.comment like '%magnalister%ricardo%: $transaction<br%'";
+
+            $readConnection = $resource->getConnection('core_read');
+            $results = $readConnection->fetchAll($query);
+            $first = true;
+            foreach ($results as $result) {
+                if (!$first)
+                    return 'Error: more than 1 orders found for ' . $order ['number'];
+                $order = Mage::getModel('sales/order')->load($result['parent_id']);
+                $first = false;
+            }
+
+        } else {
+            // normale bestellnummer
+            $order = Mage::getModel('sales/order')->loadByIncrementId($order ['number']);
+        }
 
         Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' START', null, 'komfortkasse.log');
         Mage::dispatchEvent('komfortkasse_change_order_status_before', array ('order' => $order,'status' => $status,'callbackid' => $callbackid
