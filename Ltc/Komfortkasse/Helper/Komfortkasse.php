@@ -8,7 +8,7 @@ require_once 'Komfortkasse_Order.php';
  */
 class Komfortkasse
 {
-    const PLUGIN_VER = '1.7.7';
+    const PLUGIN_VER = '1.7.8';
     const MAXLEN_SSL = 117;
     const LEN_MCRYPT = 16;
 
