@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.7.9-Magento1
+ * @version 1.7.10-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -215,7 +215,7 @@ class Komfortkasse_Order
                             $order = $creditMemo->getOrder();
                             try {
                                 $method = $order->getPayment()->getMethodInstance()->getCode();
-                            } catch ( Exception $e ) {
+                            } catch (Exception $e) {
                                 // payment method has been deleted
                                 $method = null;
                             }
@@ -262,7 +262,7 @@ class Komfortkasse_Order
         $ret ['customer_number'] = $order->getCustomerId();
         try {
             $ret ['payment_method'] = $order->getPayment()->getMethodInstance()->getCode();
-        } catch ( Exception $e ) {
+        } catch (Exception $e) {
         }
         $ret ['amount'] = $order->getGrandTotal();
         $ret ['currency_code'] = $order->getOrderCurrencyCode();

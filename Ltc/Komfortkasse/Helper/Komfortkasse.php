@@ -8,7 +8,7 @@ require_once 'Komfortkasse_Order.php';
  */
 class Komfortkasse
 {
-    const PLUGIN_VER = '1.7.9';
+    const PLUGIN_VER = '1.7.10';
     const MAXLEN_SSL = 117;
     const LEN_MCRYPT = 16;
 
@@ -708,7 +708,7 @@ class Komfortkasse
             }
 
             $ret = $ret . "\n" . Komfortkasse::mybase64_encode($encrypted);
-        } while ( $s );
+        } while ($s);
 
         openssl_free_key($key);
         return $ret;
