@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.7.10-Magento1
+ * @version 1.8.0-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -467,7 +467,7 @@ class Komfortkasse_Order
             $order = Mage::getModel('sales/order')->loadByIncrementId($order ['number']);
         }
 
-        Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' START', null, 'komfortkasse.log');
+        Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' START');
         Mage::dispatchEvent('komfortkasse_change_order_status_before', array ('order' => $order,'status' => $status,'callbackid' => $callbackid
         ));
 
@@ -480,26 +480,26 @@ class Komfortkasse_Order
             self::setPaidInternal($order, $callbackid);
             $order = Mage::getModel('sales/order')->loadByIncrementId($order->getIncrementId());
 
-            Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' add status history ' . $status . ' / ' . $callbackid, null, 'komfortkasse.log');
+            Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' add status history ' . $status . ' / ' . $callbackid);
             $history = $order->addStatusHistoryComment('' . $callbackid, $status);
             $order->setStatus($status);
             $order->save();
         } else if ($state == 'canceled') {
 
             if ($callbackid) {
-                Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' add status history ' . $status . ' / ' . $callbackid, null, 'komfortkasse.log');
+                Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' add status history ' . $status . ' / ' . $callbackid);
                 $history = $order->addStatusHistoryComment('' . $callbackid, $status);
             }
             if ($order->canCancel()) {
-                Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' cancel', null, 'komfortkasse.log');
+                Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' cancel');
                 $order->cancel();
             }
-            Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' set status ' . $status, null, 'komfortkasse.log');
+            Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' set status ' . $status);
             $order->setStatus($status);
             $order->save();
         } else {
 
-            Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' add status history ' . $status . ' / ' . $callbackid, null, 'komfortkasse.log');
+            Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' add status history ' . $status . ' / ' . $callbackid);
             $history = $order->addStatusHistoryComment('' . $callbackid, $status);
             $order->save();
         }
@@ -507,7 +507,7 @@ class Komfortkasse_Order
         Mage::dispatchEvent('komfortkasse_change_order_status_after', array ('order' => $order,'status' => $status,'callbackid' => $callbackid
         ));
 
-        Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' END. Status: ' . $order->getStatus, null, 'komfortkasse.log');
+        Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' END. Status: ' . $order->getStatus);
 
     }
 
@@ -524,20 +524,20 @@ class Komfortkasse_Order
         // If there is already an invoice, update the invoice, not the order.
         if (Komfortkasse_Config::getConfig(Komfortkasse_Config::set_invoices_paid, $order) && $order->getInvoiceCollection()->getSize() > 0) {
             foreach ($order->getInvoiceCollection() as $invoice) {
-                Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' invoice ' . $invoice->getIncrementId() . ' pay', null, 'komfortkasse.log');
+                Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' invoice ' . $invoice->getIncrementId() . ' pay');
                 $invoice->pay();
-                Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' invoice ' . $invoice->getIncrementId() . ' addComment ' . $callbackid, null, 'komfortkasse.log');
+                Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' invoice ' . $invoice->getIncrementId() . ' addComment ' . $callbackid);
                 $invoice->addComment($callbackid, false, false);
                 self::mysave($invoice);
             }
         } else {
             $payment = $order->getPayment();
-            Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' payment capture', null, 'komfortkasse.log');
+            Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' payment capture');
             $payment->capture(null);
 
             if ($callbackid) {
                 $payment->setTransactionId($callbackid);
-                Mage::log('Komfortkasse: update order ' . $order->getIncrementId() . ' addTransaction', null, 'komfortkasse.log');
+                Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' addTransaction');
                 $transaction = $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE);
             }
         }
@@ -701,18 +701,26 @@ class Komfortkasse_Order
         }
 
         if ($order['amount_paid'] >= $order['amount']) {
-            if ($order['type'] == 'PREPAYMENT' && Komfortkasse_Config::getConfig(Komfortkasse_Config::status_paid, $order) === null)
+            if ($order['type'] == 'PREPAYMENT' && Komfortkasse_Config::getConfig(Komfortkasse_Config::status_paid, $order) === null) {
+                Komfortkasse_Config::log('order not open (prepayment)');
                 return false;
-            if ($order['type'] == 'COD' && Komfortkasse_Config::getConfig(Komfortkasse_Config::status_paid_cod, $order) === null)
+            }
+            if ($order['type'] == 'COD' && Komfortkasse_Config::getConfig(Komfortkasse_Config::status_paid_cod, $order) === null) {
+                Komfortkasse_Config::log('order not open (cod)');
                 return false;
-            if ($order['type'] == 'INVOICE' && Komfortkasse_Config::getConfig(Komfortkasse_Config::status_paid_invoice, $order) === null)
+            }
+            if ($order['type'] == 'INVOICE' && Komfortkasse_Config::getConfig(Komfortkasse_Config::status_paid_invoice, $order) === null) {
+                Komfortkasse_Config::log('order not open (invoice)');
                 return false;
+            }
         }
 
         global $komfortkasse_order_extension;
         if ($komfortkasse_order_extension && method_exists('Komfortkasse_Order_Extension', 'isOpen') === true) {
             return Komfortkasse_Order_Extension::isOpen($order);
         }
+
+        return true;
 
     }
 }//end class

@@ -8,7 +8,7 @@ require_once 'Komfortkasse_Order.php';
  */
 class Komfortkasse
 {
-    const PLUGIN_VER = '1.7.10';
+    const PLUGIN_VER = '1.8.0';
     const MAXLEN_SSL = 117;
     const LEN_MCRYPT = 16;
 
@@ -395,7 +395,9 @@ class Komfortkasse
      */
     public static function notifyorder($id)
     {
+        Komfortkasse_Config::log('notifyorder BEGIN');
         if (!Komfortkasse_Config::getConfig(Komfortkasse_Config::activate_export)) {
+            Komfortkasse_Config::log('notifyorder END: global config not active');
             return;
         }
 
@@ -403,13 +405,16 @@ class Komfortkasse
         $order['type'] = self::getOrderType($order);
 
         if (!Komfortkasse_Config::getConfig(Komfortkasse_Config::activate_export, $order)) {
+            Komfortkasse_Config::log('notifyorder END: order config not active');
             return;
         }
         // See if order is relevant.
         if (!self::isOpen($order)) {
+            Komfortkasse_Config::log('notifyorder END: order not open (1)');
             return;
         }
         if (method_exists (Komfortkasse_Order, 'isOpen') && !Komfortkasse_Order::isOpen($order)) {
+            Komfortkasse_Config::log('notifyorder END: order not open (2)');
             return;
         }
 
@@ -428,7 +433,6 @@ class Komfortkasse
 
         // Development: http://localhost:8080/kkos01/api...
         $result = @file_get_contents('http://api.komfortkasse.eu/api/shop/neworder.jsf', false, $context);
-
     }
 
  // end notifyorder()
