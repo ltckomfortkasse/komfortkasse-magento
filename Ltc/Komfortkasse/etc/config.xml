@@ -3,7 +3,7 @@
 <config>
   <modules>
     <Ltc_Komfortkasse>
-      <version>1.8.0</version>
+      <version>1.8.1</version>
     </Ltc_Komfortkasse>
   </modules>
   <global>

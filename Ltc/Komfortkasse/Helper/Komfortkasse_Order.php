@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.8.0-Magento1
+ * @version 1.8.1-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -268,6 +268,8 @@ class Komfortkasse_Order
         $ret ['currency_code'] = $order->getOrderCurrencyCode();
         $ret ['exchange_rate'] = $order->getBaseToOrderRate();
         $ret ['amount_paid'] = $order->getTotalPaid();
+        $ret ['birth_date'] = $order->getCustomerDob();
+        $ret ['ip'] = $order->getRemoteIp();
 
         // Rechnungsnummer und -datum, evtl. Rechnungsbetrag
         $useInvoiceAmount = Komfortkasse::getOrderType($ret) == 'INVOICE' && Komfortkasse_Config::getConfig(Komfortkasse_Config::use_invoice_total, $ret);
@@ -349,6 +351,7 @@ class Komfortkasse_Order
             $ret ['delivery_postcode'] = utf8_encode($shippingAddress->getPostcode());
             $ret ['delivery_city'] = utf8_encode($shippingAddress->getCity());
             $ret ['delivery_countrycode'] = utf8_encode($shippingAddress->getCountryId());
+            $ret ['delivery_phone'] = utf8_encode($shippingAddress->getTelephone());
         }
 
         $billingAddress = $order->getBillingAddress();
@@ -361,6 +364,7 @@ class Komfortkasse_Order
             $ret ['billing_postcode'] = utf8_encode($billingAddress->getPostcode());
             $ret ['billing_city'] = utf8_encode($billingAddress->getCity());
             $ret ['billing_countrycode'] = utf8_encode($billingAddress->getCountryId());
+            $ret ['billing_phone'] = utf8_encode($billingAddress->getTelephone());
         } else {
             $ret ['language_code'] = substr($conf_general ['locale'] ['code'], 0, 2);
         }
