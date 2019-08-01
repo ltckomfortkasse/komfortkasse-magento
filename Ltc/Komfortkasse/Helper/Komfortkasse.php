@@ -8,9 +8,8 @@ require_once 'Komfortkasse_Order.php';
  */
 class Komfortkasse
 {
-    const PLUGIN_VER = '1.8.1';
+    const PLUGIN_VER = '1.9.1';
     const MAXLEN_SSL = 117;
-    const LEN_MCRYPT = 16;
 
 
     /**
@@ -186,22 +185,6 @@ class Komfortkasse
             if ($decrypt === 'Can you hear me?') {
                 $encryptionstring = 'openssl#' . OPENSSL_VERSION_TEXT . '#' . OPENSSL_VERSION_NUMBER . '|';
                 Komfortkasse_Config::setConfig(Komfortkasse_Config::encryption, 'openssl');
-            }
-        }
-
-        if (!$encryptionstring && extension_loaded('mcrypt') === true) {
-            // Look for mcrypt encryption.
-            $sec = Komfortkasse_Config::getRequestParameter('mCryptSecretKey');
-            $iv = Komfortkasse_Config::getRequestParameter('mCryptIV');
-            Komfortkasse_Config::setConfig(Komfortkasse_Config::privatekey, $sec);
-            Komfortkasse_Config::setConfig(Komfortkasse_Config::publickey, $iv);
-
-            // Try with mcrypt.
-            $crypttest = Komfortkasse_Config::getRequestParameter('testMCryptEnc');
-            $decrypt = Komfortkasse::kkdecrypt($crypttest, 'mcrypt');
-            if ($decrypt === 'Can you hear me?') {
-                $encryptionstring = 'mcrypt|';
-                Komfortkasse_Config::setConfig(Komfortkasse_Config::encryption, 'mcrypt');
             }
         }
 
@@ -556,8 +539,6 @@ class Komfortkasse
         switch ($encryption) {
             case 'openssl' :
                 return Komfortkasse::kkencrypt_openssl($s, $keystring);
-            case 'mcrypt' :
-                return Komfortkasse::kkencrypt_mcrypt($s);
             case 'base64' :
                 return Komfortkasse::kkencrypt_base64($s);
         }
@@ -592,8 +573,6 @@ class Komfortkasse
         switch ($encryption) {
             case 'openssl' :
                 return Komfortkasse::kkdecrypt_openssl($s, $keystring);
-            case 'mcrypt' :
-                return Komfortkasse::kkdecrypt_mcrypt($s);
             case 'base64' :
                 return Komfortkasse::kkdecrypt_base64($s);
         }
@@ -656,34 +635,6 @@ class Komfortkasse
     }
 
  // end kkdecrypt_base64()
-
-
-    /**
-     * Encrypt with mcrypt.
-     *
-     * @param string $s String to encrypt
-     *
-     * @return string decrypted string
-     */
-    protected static function kkencrypt_mcrypt($s)
-    {
-        $key = Komfortkasse_Config::getConfig(Komfortkasse_Config::privatekey);
-        $iv = Komfortkasse_Config::getConfig(Komfortkasse_Config::publickey);
-        $td = mcrypt_module_open('rijndael-128', ' ', 'cbc', $iv);
-        $init = mcrypt_generic_init($td, $key, $iv);
-
-        $padlen = ((strlen($s) + Komfortkasse::LEN_MCRYPT) % Komfortkasse::LEN_MCRYPT);
-        $s = str_pad($s, (strlen($s) + $padlen), ' ');
-        $encrypted = mcrypt_generic($td, $s);
-
-        mcrypt_generic_deinit($td);
-        mcrypt_module_close($td);
-
-        return Komfortkasse::mybase64_encode($encrypted);
-
-    }
-
- // end kkencrypt_mcrypt()
 
 
     /**
@@ -756,39 +707,6 @@ class Komfortkasse
     }
 
  // end kkdecrypt_openssl()
-
-
-    /**
-     * Decrypt with mcrypt.
-     *
-     * @param string $s String to decrypt
-     *
-     * @return string decrypted string
-     */
-    protected static function kkdecrypt_mcrypt($s)
-    {
-        $key = Komfortkasse_Config::getConfig(Komfortkasse_Config::privatekey);
-        $iv = Komfortkasse_Config::getConfig(Komfortkasse_Config::publickey);
-        $td = mcrypt_module_open('rijndael-128', ' ', 'cbc', $iv);
-        $init = mcrypt_generic_init($td, $key, $iv);
-
-        $ret = '';
-
-        $parts = explode("\n", $s);
-        foreach ($parts as $part) {
-            if ($part) {
-                $decrypted = mdecrypt_generic($td, Komfortkasse::mybase64_decode($part));
-                $ret = $ret . trim($decrypted);
-            }
-        }
-
-        mcrypt_generic_deinit($td);
-        mcrypt_module_close($td);
-        return $ret;
-
-    }
-
- // end kkdecrypt_mcrypt()
 
 
     /**
