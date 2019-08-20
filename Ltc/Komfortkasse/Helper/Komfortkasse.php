@@ -141,7 +141,7 @@ class Komfortkasse
 
         $ret .= 'accesskey:';
         // Set access code.
-        $hashed = md5(Komfortkasse_Config::getRequestParameter('accesscode'));
+        $hashed = call_user_func('md5', Komfortkasse_Config::getRequestParameter('accesscode'));
         $current = Komfortkasse_Config::getConfig(Komfortkasse_Config::accesscode);
         if ($current != '' && $current !== 'undefined' && $current != $hashed) {
             $ret .= ('Access Code already set! Shop ' . $current . ', given (hash) ' . $hashed);
@@ -503,7 +503,7 @@ class Komfortkasse
     {
         $ac = Komfortkasse_Config::getRequestParameter('accesscode');
 
-        if (!$ac || md5($ac) !== Komfortkasse_Config::getConfig(Komfortkasse_Config::accesscode)) {
+        if (!$ac || call_user_func('md5', $ac) !== Komfortkasse_Config::getConfig(Komfortkasse_Config::accesscode)) {
             return false;
         } else {
             return true;
