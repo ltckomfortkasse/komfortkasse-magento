@@ -8,7 +8,7 @@ require_once 'Komfortkasse_Order.php';
  */
 class Komfortkasse
 {
-    const PLUGIN_VER = '1.9.1';
+    const PLUGIN_VER = '1.9.2';
     const MAXLEN_SSL = 117;
 
 
@@ -314,7 +314,7 @@ class Komfortkasse
 
                 $newstatus = Komfortkasse::getNewStatus($status, $order);
                 if (empty($newstatus) === true) {
-                    if ($status == 'PAID' && method_exists(Komfortkasse_Order, 'setPaid')) {
+                    if ($status == 'PAID' && method_exists('Komfortkasse_Order', 'setPaid')) {
                         Komfortkasse_Order::setPaid($order, $callbackid);
                         $o = $o . Komfortkasse::kk_csv($id);
                     }
@@ -396,7 +396,7 @@ class Komfortkasse
             Komfortkasse_Config::log('notifyorder END: order not open (1)');
             return;
         }
-        if (method_exists (Komfortkasse_Order, 'isOpen') && !Komfortkasse_Order::isOpen($order)) {
+        if (method_exists ('Komfortkasse_Order', 'isOpen') && !Komfortkasse_Order::isOpen($order)) {
             Komfortkasse_Config::log('notifyorder END: order not open (2)');
             return;
         }
