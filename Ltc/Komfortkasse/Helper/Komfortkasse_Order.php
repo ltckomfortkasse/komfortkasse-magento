@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.9.1-Magento1
+ * @version 1.9.3-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -375,6 +375,12 @@ class Komfortkasse_Order
                 $ret ['products'] [] = $sku;
             } else {
                 $ret ['products'] [] = $item->getName();
+            }
+        }
+
+        foreach ($order->getShipmentsCollection() as $shipmentsCollection => $shipment) {
+            foreach($shipment->getTracksCollection() as $tracksCollection => $track) {
+                $ret ['shipping_number'] [] = $track->getNumber();
             }
         }
 
