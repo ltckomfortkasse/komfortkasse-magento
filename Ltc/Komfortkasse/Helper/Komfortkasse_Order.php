@@ -8,7 +8,7 @@
  * status: data type according to the shop system
  * delivery_ and billing_: _firstname, _lastname, _company, _street, _postcode, _city, _countrycode
  * products: an Array of item numbers
- * @version 1.9.3-Magento1
+ * @version 1.9.4-Magento1
  */
 $path = Mage::getModuleDir('', 'Ltc_Komfortkasse');
 global $komfortkasse_order_extension;
@@ -268,7 +268,12 @@ class Komfortkasse_Order
         $ret ['currency_code'] = $order->getOrderCurrencyCode();
         $ret ['exchange_rate'] = $order->getBaseToOrderRate();
         $ret ['amount_paid'] = $order->getTotalPaid();
-        $ret ['birth_date'] = $order->getCustomerDob();
+        try {
+            $dob = $order->getCustomerDob(); // yyyy-mm-dd hh:mm:ss
+            if ($dob)
+                $ret ['birth_date'] = strtotime($dob);
+        } catch (Exception $e) {
+        }
         $ret ['ip'] = $order->getRemoteIp();
 
         // Rechnungsnummer und -datum, evtl. Rechnungsbetrag
