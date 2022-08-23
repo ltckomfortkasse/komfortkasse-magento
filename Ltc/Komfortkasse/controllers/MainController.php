@@ -105,6 +105,19 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
 
  // end infoAction()
 
+    /**
+     * Read Config.
+     *
+     * @return void
+     */
+    public function readConfigAction()
+    {
+        $this->getResponse()->setBody(self::getHelper()->readconfig());
+
+    }
+
+    // end infoAction()
+
 
     /**
      * Get Helper.
