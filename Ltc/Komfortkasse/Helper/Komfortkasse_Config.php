@@ -91,7 +91,8 @@ class Komfortkasse_Config
      */
     public static function getRequestParameter($key)
     {
-        return urldecode(Mage::app()->getRequest()->getParam($key));
+        $value = Mage::app()->getRequest()->getParam($key);
+        return is_string($value) ? urldecode($value) : '';
 
     }
 

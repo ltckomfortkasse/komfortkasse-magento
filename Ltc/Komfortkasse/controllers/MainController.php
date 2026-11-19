@@ -140,6 +140,7 @@ class Ltc_Komfortkasse_MainController extends Mage_Core_Controller_Front_Action
         $contentType = 'application/pdf';
         $contentLength = strlen($content);
 
+        $fileName = 'invoice.pdf';
         $this->getResponse()->setHttpResponseCode(200)->setHeader('Pragma', 'public', true)->setHeader('Cache-Control', 'must-revalidate, post-check=0, pre-check=0', true)->setHeader('Content-type', $contentType, true)->setHeader('Content-Length', $contentLength, true)->setHeader('Content-Disposition', 'attachment; filename="' . $fileName . '"', true)->setHeader('Last-Modified', date('r'), true);
         $this->getResponse()->setBody($content);
     }

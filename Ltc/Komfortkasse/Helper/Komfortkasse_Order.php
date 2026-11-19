@@ -80,7 +80,7 @@ class Komfortkasse_Order
                             if ($komfortkasse_order_extension && method_exists('Komfortkasse_Order_Extension', 'extendOpenIDsQueryJoin') === true)
                                 $query .= Komfortkasse_Order_Extension::extendOpenIDsQueryJoin($resource);
 
-                            $query .= ' where o.store_id=' . $store_id . ' and created_at > ' . $minDate . ' and (';
+                            $query .= ' where o.store_id=' . (int) $store_id . " and o.created_at > '" . $minDate . "' and (";
                             $first = true;
                             $m2e_used = false;
 
@@ -349,27 +349,27 @@ class Komfortkasse_Order
 
         $shippingAddress = $order->getShippingAddress();
         if ($shippingAddress) {
-            $ret ['delivery_firstname'] = utf8_encode($shippingAddress->getFirstname());
-            $ret ['delivery_lastname'] = utf8_encode($shippingAddress->getLastname());
-            $ret ['delivery_company'] = utf8_encode($shippingAddress->getCompany());
-            $ret ['delivery_street'] = utf8_encode($shippingAddress->getStreetFull());
-            $ret ['delivery_postcode'] = utf8_encode($shippingAddress->getPostcode());
-            $ret ['delivery_city'] = utf8_encode($shippingAddress->getCity());
-            $ret ['delivery_countrycode'] = utf8_encode($shippingAddress->getCountryId());
-            $ret ['delivery_phone'] = utf8_encode($shippingAddress->getTelephone());
+            $ret ['delivery_firstname'] = Komfortkasse::myutf8_encode($shippingAddress->getFirstname());
+            $ret ['delivery_lastname'] = Komfortkasse::myutf8_encode($shippingAddress->getLastname());
+            $ret ['delivery_company'] = Komfortkasse::myutf8_encode($shippingAddress->getCompany());
+            $ret ['delivery_street'] = Komfortkasse::myutf8_encode($shippingAddress->getStreetFull());
+            $ret ['delivery_postcode'] = Komfortkasse::myutf8_encode($shippingAddress->getPostcode());
+            $ret ['delivery_city'] = Komfortkasse::myutf8_encode($shippingAddress->getCity());
+            $ret ['delivery_countrycode'] = Komfortkasse::myutf8_encode($shippingAddress->getCountryId());
+            $ret ['delivery_phone'] = Komfortkasse::myutf8_encode($shippingAddress->getTelephone());
         }
 
         $billingAddress = $order->getBillingAddress();
         if ($billingAddress) {
             $ret ['language_code'] = substr($conf_general ['locale'] ['code'], 0, 2) . '-' . $billingAddress->getCountryId();
-            $ret ['billing_firstname'] = utf8_encode($billingAddress->getFirstname());
-            $ret ['billing_lastname'] = utf8_encode($billingAddress->getLastname());
-            $ret ['billing_company'] = utf8_encode($billingAddress->getCompany());
-            $ret ['billing_street'] = utf8_encode($billingAddress->getStreetFull());
-            $ret ['billing_postcode'] = utf8_encode($billingAddress->getPostcode());
-            $ret ['billing_city'] = utf8_encode($billingAddress->getCity());
-            $ret ['billing_countrycode'] = utf8_encode($billingAddress->getCountryId());
-            $ret ['billing_phone'] = utf8_encode($billingAddress->getTelephone());
+            $ret ['billing_firstname'] = Komfortkasse::myutf8_encode($billingAddress->getFirstname());
+            $ret ['billing_lastname'] = Komfortkasse::myutf8_encode($billingAddress->getLastname());
+            $ret ['billing_company'] = Komfortkasse::myutf8_encode($billingAddress->getCompany());
+            $ret ['billing_street'] = Komfortkasse::myutf8_encode($billingAddress->getStreetFull());
+            $ret ['billing_postcode'] = Komfortkasse::myutf8_encode($billingAddress->getPostcode());
+            $ret ['billing_city'] = Komfortkasse::myutf8_encode($billingAddress->getCity());
+            $ret ['billing_countrycode'] = Komfortkasse::myutf8_encode($billingAddress->getCountryId());
+            $ret ['billing_phone'] = Komfortkasse::myutf8_encode($billingAddress->getTelephone());
         } else {
             $ret ['language_code'] = substr($conf_general ['locale'] ['code'], 0, 2);
         }
@@ -420,7 +420,7 @@ class Komfortkasse_Order
     public static function getRefund($number)
     {
         $resource = Mage::getSingleton('core/resource');
-        $id = $resource->getConnection('core_read')->fetchOne('SELECT `entity_id` FROM `' . $resource->getTableName('sales/creditmemo') . "` WHERE `increment_id` = '" . $number . "'");
+        $id = $resource->getConnection('core_read')->fetchOne('SELECT `entity_id` FROM `' . $resource->getTableName('sales/creditmemo') . '` WHERE `increment_id` = ?', array ((string) $number));
 
         $creditMemo = Mage::getModel('sales/order_creditmemo')->load($id);
         if (empty($number) === true || empty($creditMemo) === true || $number != $creditMemo->getIncrementId()) {
@@ -582,6 +582,11 @@ class Komfortkasse_Order
         // If there is already an invoice, update the invoice, not the order.
         if (Komfortkasse_Config::getConfig(Komfortkasse_Config::set_invoices_paid, $order) && $order->getInvoiceCollection()->getSize() > 0) {
             foreach ($order->getInvoiceCollection() as $invoice) {
+                // pay only open invoices: pay() adds the invoice amount to the order's total paid,
+                // also for an invoice that is already paid; a canceled invoice stays canceled
+                if ($invoice->getState() != Mage_Sales_Model_Order_Invoice::STATE_OPEN) {
+                    continue;
+                }
                 Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' invoice ' . $invoice->getIncrementId() . ' pay');
                 $invoice->pay();
                 Komfortkasse_Config::log('Komfortkasse: update order ' . $order->getIncrementId() . ' invoice ' . $invoice->getIncrementId() . ' addComment ' . $callbackid);
@@ -615,7 +620,7 @@ class Komfortkasse_Order
     public static function updateRefund($refundIncrementId, $status, $callbackid)
     {
         $resource = Mage::getSingleton('core/resource');
-        $id = $resource->getConnection('core_read')->fetchOne('SELECT `entity_id` FROM `' . $resource->getTableName('sales/creditmemo') . "` WHERE `increment_id` = '" . $refundIncrementId . "'");
+        $id = $resource->getConnection('core_read')->fetchOne('SELECT `entity_id` FROM `' . $resource->getTableName('sales/creditmemo') . '` WHERE `increment_id` = ?', array ((string) $refundIncrementId));
 
         $creditMemo = Mage::getModel('sales/order_creditmemo')->load($id);
 
@@ -662,6 +667,7 @@ class Komfortkasse_Order
 
     public static function getInvoicePdf($invoiceNumber, $orderNumber)
     {
+        $content = null;
         if ($invoiceNumber) {
 
             $invoice = Mage::getModel('sales/order_invoice')->loadByIncrementId($invoiceNumber);

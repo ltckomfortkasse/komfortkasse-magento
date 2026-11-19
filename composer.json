@@ -22,7 +22,7 @@
       "email": "support@komfortkasse.eu",
       "source": "https://github.com/ltckomfortkasse/komfortkasse-magento"
   },
-  "version": "1.7.7",
+  "version": "1.9.6",
   "require": {
   },
   "repositories":[     

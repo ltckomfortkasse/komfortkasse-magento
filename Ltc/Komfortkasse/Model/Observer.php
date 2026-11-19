@@ -42,6 +42,8 @@ class Ltc_Komfortkasse_Model_Observer
         $regName = self::getRegName($observer);
         if ($regName) {
             Mage::log('regName: ' . $regName, null, 'komfortkasse.log');
+            // the order may already have been loaded in this request (noteOrderStatus)
+            Mage::unregister($regName);
             Mage::register($regName, '_new');
         }
 
@@ -85,7 +87,15 @@ class Ltc_Komfortkasse_Model_Observer
             Mage::log('regName: ' .$regName . ' status: ' .$orderStatus, null, 'komfortkasse.log');
             if ($orderStatus != $observer->getOrder()->getStatus()) {
                 $helper = Mage::helper('Ltc_Komfortkasse');
-                $helper->notifyorder($observer->getOrder()->getIncrementId());
+                // runs inside the order save transaction: the notification must never
+                // abort (and roll back) the order save
+                try {
+                    $helper->notifyorder($observer->getOrder()->getIncrementId());
+                } catch (Throwable $e) {
+                    Mage::log('notifyorder failed: ' . $e->getMessage(), null, 'komfortkasse.log');
+                } catch (Exception $e) {
+                    Mage::log('notifyorder failed: ' . $e->getMessage(), null, 'komfortkasse.log');
+                }
             }
 
             Mage::unregister($regName);
